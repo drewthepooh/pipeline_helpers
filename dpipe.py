@@ -6,6 +6,7 @@ import subprocess
 from os.path import join as pjoin
 from concurrent import futures
 from multiprocessing import cpu_count
+import collections
 
 import __main__
 
@@ -71,17 +72,47 @@ class Dummy:
 
 
 def subprocesses(command, iterable):
+
+    # Some sanity checks
+    iterable = list(iterable)
     assert isinstance(command, list), 'Command must be a list'
-    handlers = []
-    for item in iterable:
+    if all(isinstance(x, str) for x in iterable):
+        strings = True
+    elif all(isinstance(x, tuple) for x in iterable):
+        strings = False
+    else:
+        raise TypeError('Objects in iterable must be all strings or all tuples')
+
+    dummy_count = sum(1 for cm in command if isinstance(cm, Dummy))
+    if strings:
+        assert dummy_count == 1, 'Number of dummies does not match iterable item length'
+    else:
+        length = len(iterable[0])
+        for item in iterable:
+            assert len(item) == length, 'Items in iterable not uniform in length'
+        assert length == dummy_count, 'Number of dummies does not match iterable item length'
+
+
+    # Iterator over the indices containing dummy instances in the command
+    def dummy_indices(command):
         for i, cm in enumerate(command):
             if isinstance(cm, Dummy):
-                command[i] = item
-                handlers.append(subprocess.Popen(command))
-                command[i] = Dummy()
+                yield i
+
+    handlers = []
+    if strings:
+        for item in iterable:
+            command_copy = command[:]
+            for dummy_index in dummy_indices(command):
+                command_copy[dummy_index] = item
+            handlers.append(subprocess.Popen(command_copy))
+    else:
+        for item in iterable:
+            command_copy = command[:]
+            for it, dummy_index in zip(item, dummy_indices(command)):
+                command_copy[dummy_index] = it
+            handlers.append(subprocess.Popen(command_copy))
 
     for h in handlers:
         rc = h.wait()
         assert rc == 0, 'subprocess return with non-0 return code'
-
-

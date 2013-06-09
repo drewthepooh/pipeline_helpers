@@ -48,12 +48,20 @@ Trivial (so trivial it's nearly useless) wrapper of the concurrent futures Proce
 
 ## subprocesses
 
-Allows for easy parallel subprocess calls. subprocesses takes a command (as a list), and an iterable as arguments and executes the command with each item from the iterable substituted in for a dummy, e.g.
+Allows for easy parallel subprocess calls. subprocesses takes a command (as a list), and an iterable of strings or tuples and executes the command with each item from the iterable substituted in for a dummy, e.g.
 
     from dpipe import Dummy
 
     command = ['echo', Dummy()]
     dpipe.subprocesses(command, ['hello', 'world!', 'I', 'like', 'you!'])
+
+    print()
+
+    command = ['echo', dpipe.Dummy(), dpipe.Dummy()]
+    adjectives = ['big', 'hairy', 'round']
+    nouns = ['house', 'friend', 'balloon']
+    dpipe.subprocesses(command, zip(adjectives, nouns))
+
 
 Gives:
 
@@ -62,6 +70,10 @@ Gives:
     I
     like
     you!
+
+    big house
+    hairy friend
+    round balloon
 
 The dummy must be an instance of the dpipe.Dummy class.
 Will raise an error if the return code of the inputted command is not 0.
