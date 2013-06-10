@@ -74,8 +74,9 @@ def subprocesses(command, iterable):
     and an iterable of strings or tuples and executes the command with each item from
     the iterable substituted in for a dummy'''
 
-    # Start sanity checks
     iterable = list(iterable)
+
+    # Start sanity checks
     assert isinstance(command, list), 'Command must be a list'
     if all(isinstance(x, str) for x in iterable):
         strings = True
@@ -99,7 +100,7 @@ def subprocesses(command, iterable):
     def log_and_append(handlers, command):
         pretty_command = pprint.pformat(command, indent=4)
         log.debug('Running command:\n{}'.format(pretty_command))
-        handlers.append(subprocess.Popen(command_copy))
+        handlers.append((subprocess.Popen(command), command))
 
     handlers = []
     if strings:
@@ -116,5 +117,9 @@ def subprocesses(command, iterable):
             log_and_append(handlers, command_copy)
 
     for h in handlers:
-        rc = h.wait()
-        assert rc == 0, 'subprocess return with non-0 return code'
+        rc = h[0].wait()
+        if rc:
+            cmd = h[1]
+            raise subprocess.CalledProcessError(rc, cmd)
+
+

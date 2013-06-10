@@ -14,6 +14,12 @@ This will automatically initialize the log, which will go to both the console an
     log_file_path = '/desired/path/'
 
 Before the import statement.
+If you want to use the logger in your own code, simply import the logging module and get the logger instance:
+
+    import logging
+    log = logging.getLogger('')
+    log.info('Some info message')  # Will go to console and file
+    log.debug('Some debug message')  # Will go to file but not console.
 
 ## logwrap
 
