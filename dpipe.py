@@ -5,32 +5,23 @@ import subprocess
 from os.path import join as pjoin
 from concurrent import futures
 
-import __main__
 
-try:
-    log_file_path = __main__.log_file_path
-except AttributeError:
-    print('\n' + ('>'*55))
-    print('''WARNING: Log file will be stored in the current directory.
-If you would like to specify a different directory, add
-a variable called "log_file_path" before importing dpipe.''')
-    print('<'*55 + '\n')
-    log_file_path = '.'
+def initLogger(path):
+    format = '%(levelname)s [%(asctime)s] %(message)s'
+    datefmt = '%m/%d/%Y %H:%M:%S'
 
-format = '%(levelname)s [%(asctime)s] %(message)s'
-datefmt = '%m/%d/%Y %H:%M:%S'
-
-log = logging.getLogger('log')
-log.setLevel(logging.DEBUG)
-ch = logging.StreamHandler()
-ch.setLevel(logging.INFO)
-formatter = logging.Formatter(fmt=format, datefmt=datefmt)
-ch.setFormatter(formatter)
-log.addHandler(ch)
-fh = logging.FileHandler(pjoin(log_file_path, 'log.log'))
-fh.setLevel(logging.DEBUG)
-fh.setFormatter(formatter)
-log.addHandler(fh)
+    global log
+    log = logging.getLogger('dpipe')
+    log.setLevel(logging.DEBUG)
+    ch = logging.StreamHandler()
+    ch.setLevel(logging.INFO)
+    formatter = logging.Formatter(fmt=format, datefmt=datefmt)
+    ch.setFormatter(formatter)
+    log.addHandler(ch)
+    fh = logging.FileHandler(pjoin(path, 'dpipe.log'))
+    fh.setLevel(logging.DEBUG)
+    fh.setFormatter(formatter)
+    log.addHandler(fh)
 
 
 def logwrap(func):
@@ -46,7 +37,7 @@ def logwrap(func):
     return log_wrapper
 
 
-def sub_call(command, stdout=None, shell=False):
+def callAndLog(command, stdout=None, shell=False):
     '''Logs subprocess commands.'''
 
     pretty_command = pprint.pformat(command, indent=4)
@@ -121,5 +112,4 @@ def subprocesses(command, iterable):
         if rc:
             cmd = h[1]
             raise subprocess.CalledProcessError(rc, cmd)
-
 

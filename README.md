@@ -8,18 +8,16 @@ Usage:
 ## Initialization
 
     import dpipe
+    dpipe.initLogger('/desired/path/to/logfile')
 
-This will automatically initialize the log, which will go to both the console and a file called log.log.  By default the log file will be placed in the current directory.  If you want to specify a different directory add the line:
+Import the module and initialize the log, which will go to both the console and a file called dpipe.log. IMPORTANT: you must call initLogger before using any other dpipe function, as they depend on it.
 
-    log_file_path = '/desired/path/'
-
-Before the import statement.
 If you want to use the logger in your own code, simply import the logging module and get the logger instance:
 
     import logging
-    log = logging.getLogger('')
+    log = logging.getLogger('dpipe')
     log.info('Some info message')  # Will go to console and file
-    log.debug('Some debug message')  # Will go to file but not console.
+    log.debug('Some debug message')  # Will go to dpipe.log but not console.
 
 ## logwrap
 
@@ -37,11 +35,11 @@ Gives, as output:
     Running...
     INFO [06/09/2013 23:45:24]  Finished my_pipeline_function
 
-## sub_call
+## callAndLog
 
 Wrapper of the check_call function from the subprocess module. Logs each command to the log file (but not the console).
 
-    dpipe.sub_call['ls', 'l']
+    dpipe.callAndLog['ls', 'l']
 
 ## processes
 
