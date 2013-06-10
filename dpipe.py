@@ -4,6 +4,7 @@ import pprint
 import subprocess
 from os.path import join as pjoin
 from concurrent import futures
+import sys
 
 
 def initLogger(path):
@@ -32,7 +33,7 @@ def logwrap(func):
     def log_wrapper(*args, **kwargs):
         log.info('{:-^50}'.format(' Beginning ' + func.__name__ + ' '))
         output = func(*args, **kwargs)
-        log.info(' Finished ' + func.__name__ + ' ')
+        log.info('Finished ' + func.__name__ + ' ')
         return output
     return log_wrapper
 
@@ -60,52 +61,41 @@ class Dummy:
     pass
 
 
-def subprocesses(template, iterable):
+def subprocesses(template, iterable, stdout=None):
     '''Allows for easy parallel subprocess calls. subprocesses takes a template (as a list),
     and an iterable of strings or tuples and executes commands formed from the template
     by substituting dummies in the template with each item from the iterable.'''
 
     iterable = list(iterable)
 
-    # Start sanity checks
+    # Sanity checks
     assert isinstance(template, list), 'Template must be a list'
     if all(isinstance(x, str) for x in iterable):
-        strings = True
+        iterable = [(x,) for x in iterable]
     elif all(isinstance(x, tuple) for x in iterable):
-        strings = False
+        pass
     else:
         raise TypeError('Objects in iterable must be all strings or all tuples')
 
     dummy_count = sum(1 for t in template if isinstance(t, Dummy))
-    if strings:
-        assert dummy_count == 1, 'Number of dummies does not match iterable item length'
-    else:
-        length = len(iterable[0])
-        for item in iterable:
-            assert len(item) == length, 'Items in iterable not uniform in length'
-        assert length == dummy_count, 'Number of dummies does not match iterable item length'
-    # End sanity checks
+    length = len(iterable[0])
+    for item in iterable:
+        assert len(item) == length, 'Items in iterable not uniform in length'
+    assert length == dummy_count, 'Number of dummies does not match iterable item length'
 
     dummy_indices = [i for i, v in enumerate(template) if isinstance(v, Dummy)]
 
     def log_and_append(handlers, command):
         pretty_command = pprint.pformat(command, indent=4)
         log.debug('Running command:\n{}'.format(pretty_command))
-        handlers.append((subprocess.Popen(command), command))
+        handlers.append((subprocess.Popen(command, stdout=stdout), command))
 
     handlers = []
-    if strings:
-        for item in iterable:
-            command = template[:]
-            for dummy_index in dummy_indices:
-                command[dummy_index] = item
-            log_and_append(handlers, command)
-    else:
-        for item in iterable:
-            command = template[:]
-            for it, dummy_index in zip(item, dummy_indices):
-                command[dummy_index] = it
-            log_and_append(handlers, command)
+    for item in iterable:
+        command = template[:]
+        for it, dummy_index in zip(item, dummy_indices):
+            command[dummy_index] = it
+        log_and_append(handlers, command)
 
     for h in handlers:
         rc = h[0].wait()

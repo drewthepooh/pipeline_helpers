@@ -84,4 +84,4 @@ Gives:
     round balloon
 
 The dummy must be an instance of the dpipe.Dummy class.
-Will raise an error if the return code of the inputted command is not 0.
+Will raise an error if the return code of each command is not zero.
