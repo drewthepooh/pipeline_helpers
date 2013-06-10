@@ -60,15 +60,15 @@ class Dummy:
     pass
 
 
-def subprocesses(command, iterable):
-    '''Allows for easy parallel subprocess calls. subprocesses takes a command (as a list),
-    and an iterable of strings or tuples and executes the command with each item from
-    the iterable substituted in for a dummy'''
+def subprocesses(template, iterable):
+    '''Allows for easy parallel subprocess calls. subprocesses takes a template (as a list),
+    and an iterable of strings or tuples and executes commands formed from the template
+    by substituting dummies in the template with each item from the iterable.'''
 
     iterable = list(iterable)
 
     # Start sanity checks
-    assert isinstance(command, list), 'Command must be a list'
+    assert isinstance(template, list), 'Template must be a list'
     if all(isinstance(x, str) for x in iterable):
         strings = True
     elif all(isinstance(x, tuple) for x in iterable):
@@ -76,7 +76,7 @@ def subprocesses(command, iterable):
     else:
         raise TypeError('Objects in iterable must be all strings or all tuples')
 
-    dummy_count = sum(1 for cm in command if isinstance(cm, Dummy))
+    dummy_count = sum(1 for t in template if isinstance(t, Dummy))
     if strings:
         assert dummy_count == 1, 'Number of dummies does not match iterable item length'
     else:
@@ -86,7 +86,7 @@ def subprocesses(command, iterable):
         assert length == dummy_count, 'Number of dummies does not match iterable item length'
     # End sanity checks
 
-    dummy_indices = [i for i, v in enumerate(command) if isinstance(v, Dummy)]
+    dummy_indices = [i for i, v in enumerate(template) if isinstance(v, Dummy)]
 
     def log_and_append(handlers, command):
         pretty_command = pprint.pformat(command, indent=4)
@@ -96,16 +96,16 @@ def subprocesses(command, iterable):
     handlers = []
     if strings:
         for item in iterable:
-            command_copy = command[:]
+            command = template[:]
             for dummy_index in dummy_indices:
-                command_copy[dummy_index] = item
-            log_and_append(handlers, command_copy)
+                command[dummy_index] = item
+            log_and_append(handlers, command)
     else:
         for item in iterable:
-            command_copy = command[:]
+            command = template[:]
             for it, dummy_index in zip(item, dummy_indices):
-                command_copy[dummy_index] = it
-            log_and_append(handlers, command_copy)
+                command[dummy_index] = it
+            log_and_append(handlers, command)
 
     for h in handlers:
         rc = h[0].wait()

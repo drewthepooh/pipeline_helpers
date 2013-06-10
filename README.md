@@ -43,7 +43,7 @@ Wrapper of the check_call function from the subprocess module. Logs each command
 
 ## processes
 
-Trivial (so trivial it's nearly useless) wrapper of the concurrent futures ProcessPoolExecutor map functionality. This function takes a function and an iterable and calls the function with each argument of the iterable in parallel.
+Trivial (so trivial it's nearly useless) wrapper of the concurrent futures ProcessPoolExecutor map functionality. This function takes a function and an iterable and calls the function with each argument of the iterable in parallel.  Additional functionality (such as logging) will be added in the future.
 
     def myfun(num):
         return num**2
@@ -52,7 +52,9 @@ Trivial (so trivial it's nearly useless) wrapper of the concurrent futures Proce
 
 ## subprocesses
 
-Allows for easy parallel subprocess calls. subprocesses takes a command (as a list), and an iterable of strings or tuples and executes the command with each item from the iterable substituted in for a dummy, e.g.
+Allows for easy parallel subprocess calls. subprocesses takes a template (as a list),
+and an iterable of strings or tuples and executes commands formed from the template
+by substituting dummies in the template with items from the iterable, e.g.
 
     from dpipe import Dummy
 
