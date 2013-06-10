@@ -15,7 +15,7 @@ This will automatically initialize the log, which will go to both the console an
 
 Before the import statement.
 
-## Logwrap
+## logwrap
 
 A decorator that you can use to log function starts and ends, e.g.:
 

@@ -99,19 +99,24 @@ def subprocesses(command, iterable):
             if isinstance(cm, Dummy):
                 yield i
 
+    def log_and_append(handlers, command):
+        pretty_command = pprint.pformat(command, indent=4)
+        log.debug('Running command:\n{}'.format(pretty_command))
+        handlers.append(subprocess.Popen(command_copy))
+
     handlers = []
     if strings:
         for item in iterable:
             command_copy = command[:]
             for dummy_index in dummy_indices(command):
                 command_copy[dummy_index] = item
-            handlers.append(subprocess.Popen(command_copy))
+            log_and_append(handlers, command_copy)
     else:
         for item in iterable:
             command_copy = command[:]
             for it, dummy_index in zip(item, dummy_indices(command)):
                 command_copy[dummy_index] = it
-            handlers.append(subprocess.Popen(command_copy))
+            log_and_append(handlers, command_copy)
 
     for h in handlers:
         rc = h.wait()
