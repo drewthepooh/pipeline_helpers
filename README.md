@@ -60,15 +60,15 @@ by substituting dummies in the template with items from the iterable, e.g.
 
     d = Dummy()
 
-    command = ['echo', d]
-    dpipe.subprocesses(command, ['hello', 'world!', 'I', 'like', 'you!'])
+    template = ['echo', d]
+    dpipe.subprocesses(template, ['hello', 'world!', 'I', 'like', 'you!'])
 
     print()
 
-    command = ['echo', d, d]
+    template = ['echo', d, d]
     adjectives = ['big', 'hairy', 'round']
     nouns = ['house', 'friend', 'balloon']
-    dpipe.subprocesses(command, zip(adjectives, nouns))
+    dpipe.subprocesses(template, zip(adjectives, nouns))
 
 
 Gives:
@@ -84,4 +84,6 @@ Gives:
     round balloon
 
 The dummy must be an instance of the dpipe.Dummy class.
-Will raise an error if the return code of each command is not zero.
+Will raise an error if the return code of each command is not zero. To disable this behavior set checkrc=False, e.g.
+
+     dpipe.subprocesses(template, iterable, checkrc=False)

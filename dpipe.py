@@ -61,45 +61,58 @@ class Dummy:
     pass
 
 
-def subprocesses(template, iterable, stdout=None):
+class subprocesses:
     '''Allows for easy parallel subprocess calls. subprocesses takes a template (as a list),
     and an iterable of strings or tuples and executes commands formed from the template
     by substituting dummies in the template with each item from the iterable.'''
 
-    iterable = list(iterable)
+    def __init__(self, template, iterable, *, checkrc=True, stdout=None, run=True):
+        self.template = template
+        self.iterable = list(iterable)
+        self.dummy_indices = [i for i, v in enumerate(template) if isinstance(v, Dummy)]
+        self.stdout = stdout
+        self.checkrc = checkrc
 
-    # Sanity checks
-    assert isinstance(template, list), 'Template must be a list'
-    if all(isinstance(x, str) for x in iterable):
-        iterable = [(x,) for x in iterable]
-    elif all(isinstance(x, tuple) for x in iterable):
-        pass
-    else:
-        raise TypeError('Objects in iterable must be all strings or all tuples')
+        self._sanity_check()
 
-    dummy_count = sum(1 for t in template if isinstance(t, Dummy))
-    length = len(iterable[0])
-    for item in iterable:
-        assert len(item) == length, 'Items in iterable not uniform in length'
-    assert length == dummy_count, 'Number of dummies does not match iterable item length'
+        if run:
+            self._execute_children()
 
-    dummy_indices = [i for i, v in enumerate(template) if isinstance(v, Dummy)]
+    def _sanity_check(self):
+        assert isinstance(self.template, list), 'Template must be a list'
+        if all(isinstance(x, str) for x in self.iterable):
+            self.iterable = [(x,) for x in self.iterable]
+        elif all(isinstance(x, tuple) for x in self.iterable):
+            pass
+        else:
+            raise TypeError('Objects in iterable must be all strings or all tuples')
 
-    def log_and_append(handlers, command):
-        pretty_command = pprint.pformat(command, indent=4)
-        log.debug('Running command:\n{}'.format(pretty_command))
-        handlers.append((subprocess.Popen(command, stdout=stdout), command))
+        dummy_count = sum(1 for t in self.template if isinstance(t, Dummy))
+        length = len(self.iterable[0])
+        for item in self.iterable:
+            assert len(item) == length, 'Items in iterable not uniform in length'
+        assert length == dummy_count, 'Number of dummies does not match iterable item length'
 
-    handlers = []
-    for item in iterable:
-        command = template[:]
-        for it, dummy_index in zip(item, dummy_indices):
-            command[dummy_index] = it
-        log_and_append(handlers, command)
+    def _get_commands(self):
+        commands = []
+        for item in self.iterable:
+            command = self.template[:]
+            for it, dummy_index in zip(item, self.dummy_indices):
+                command[dummy_index] = it
+            commands.append(command)
+        return commands
 
-    for h in handlers:
-        rc = h[0].wait()
-        if rc:
-            cmd = h[1]
-            raise subprocess.CalledProcessError(rc, cmd)
+    def _execute_children(self):
+        commands = self._get_commands()
+        handlers = []
+        for command in commands:
+            pretty_command = pprint.pformat(command, indent=4)
+            log.debug('Running command:\n{}'.format(pretty_command))
+            handlers.append((subprocess.Popen(command, stdout=self.stdout), command))
 
+        if self.checkrc:
+            for h in handlers:
+                rc = h[0].wait()
+                if rc:
+                    cmd = h[1]
+                    raise subprocess.CalledProcessError(rc, cmd)
