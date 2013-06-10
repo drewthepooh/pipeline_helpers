@@ -37,10 +37,9 @@ log.addHandler(fh)
 
 
 def logwrap(func):
-    '''
-    Decorator which will wrap functions so that the beginning
-    and end is logged.
-    '''
+    '''Decorator which will wrap functions so that the beginning
+    and end is logged.'''
+
     @functools.wraps(func)
     def log_wrapper(*args, **kwargs):
         log.info('{:-^50}'.format(' Beginning ' + func.__name__ + ' '))
@@ -51,9 +50,8 @@ def logwrap(func):
 
 
 def sub_call(command, stdout=None, shell=False):
-    '''
-    Logs subprocess commands.
-    '''
+    '''Logs subprocess commands.'''
+
     pretty_command = pprint.pformat(command, indent=4)
     log.debug('running command:\n{}'.format(pretty_command))
     if stdout:
@@ -62,6 +60,9 @@ def sub_call(command, stdout=None, shell=False):
 
 
 def processes(func, iterable):
+    '''Takes a function and an iterable and calls the function with each argument of the
+    iterable in parallel.'''
+
     with futures.ProcessPoolExecutor() as executor:
         result = executor.map(func, iterable)
     return result
@@ -72,8 +73,11 @@ class Dummy:
 
 
 def subprocesses(command, iterable):
+    '''Allows for easy parallel subprocess calls. subprocesses takes a command (as a list),
+    and an iterable of strings or tuples and executes the command with each item from
+    the iterable substituted in for a dummy'''
 
-    # Some sanity checks
+    # Start sanity checks
     iterable = list(iterable)
     assert isinstance(command, list), 'Command must be a list'
     if all(isinstance(x, str) for x in iterable):
@@ -91,13 +95,9 @@ def subprocesses(command, iterable):
         for item in iterable:
             assert len(item) == length, 'Items in iterable not uniform in length'
         assert length == dummy_count, 'Number of dummies does not match iterable item length'
+    # End sanity checks
 
-
-    # Iterator over the indices containing dummy instances in the command
-    def dummy_indices(command):
-        for i, cm in enumerate(command):
-            if isinstance(cm, Dummy):
-                yield i
+    dummy_indices = (command.index(x) for x in command if isinstance(x, Dummy))
 
     def log_and_append(handlers, command):
         pretty_command = pprint.pformat(command, indent=4)
@@ -108,13 +108,13 @@ def subprocesses(command, iterable):
     if strings:
         for item in iterable:
             command_copy = command[:]
-            for dummy_index in dummy_indices(command):
+            for dummy_index in dummy_indices:
                 command_copy[dummy_index] = item
             log_and_append(handlers, command_copy)
     else:
         for item in iterable:
             command_copy = command[:]
-            for it, dummy_index in zip(item, dummy_indices(command)):
+            for it, dummy_index in zip(item, dummy_indices):
                 command_copy[dummy_index] = it
             log_and_append(handlers, command_copy)
 
