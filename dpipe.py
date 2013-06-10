@@ -1,12 +1,9 @@
 import logging
-import logging.config
 import functools
 import pprint
 import subprocess
 from os.path import join as pjoin
 from concurrent import futures
-from multiprocessing import cpu_count
-import collections
 
 import __main__
 
@@ -97,7 +94,7 @@ def subprocesses(command, iterable):
         assert length == dummy_count, 'Number of dummies does not match iterable item length'
     # End sanity checks
 
-    dummy_indices = (command.index(x) for x in command if isinstance(x, Dummy))
+    dummy_indices = [i for i, v in enumerate(command) if isinstance(v, Dummy)]
 
     def log_and_append(handlers, command):
         pretty_command = pprint.pformat(command, indent=4)

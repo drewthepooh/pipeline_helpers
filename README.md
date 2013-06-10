@@ -52,12 +52,14 @@ Allows for easy parallel subprocess calls. subprocesses takes a command (as a li
 
     from dpipe import Dummy
 
-    command = ['echo', Dummy()]
+    d = Dummy()
+
+    command = ['echo', d]
     dpipe.subprocesses(command, ['hello', 'world!', 'I', 'like', 'you!'])
 
     print()
 
-    command = ['echo', dpipe.Dummy(), dpipe.Dummy()]
+    command = ['echo', d, d]
     adjectives = ['big', 'hairy', 'round']
     nouns = ['house', 'friend', 'balloon']
     dpipe.subprocesses(command, zip(adjectives, nouns))
