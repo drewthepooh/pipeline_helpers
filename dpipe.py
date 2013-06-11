@@ -14,7 +14,7 @@ def initLogger(path):
     datefmt = '%m/%d/%Y %H:%M:%S'
 
     global log
-    log = logging.getLogger('dpipe')
+    log = logging.getLogger(__name__)
     log.setLevel(logging.DEBUG)
     ch = logging.StreamHandler()
     ch.setLevel(logging.INFO)
@@ -33,7 +33,7 @@ def logwrap(func):
 
     @functools.wraps(func)
     def log_wrapper(*args, **kwargs):
-        log.info('{:-^50}'.format(' Beginning ' + func.__name__ + ' '))
+        log.info(format((' Beginning ' + func.__name__ + ' '), '-^50'))
         output = func(*args, **kwargs)
         log.info('Finished ' + func.__name__ + ' ')
         return output
@@ -48,15 +48,6 @@ def callAndLog(command, stdout=None, shell=False):
     if stdout:
         log.debug('writing to: ' + stdout.name)
     subprocess.check_call(command, stdout=stdout, shell=shell)
-
-
-def processes(func, iterable):
-    '''Takes a function and an iterable and calls the function with each argument of the
-    iterable in parallel.'''
-
-    with futures.ProcessPoolExecutor() as executor:
-        result = executor.map(func, iterable)
-    return result
 
 
 @contextmanager
@@ -88,11 +79,10 @@ class subprocesses:
     and an iterable of strings or tuples and executes commands formed from the template
     by substituting dummies in the template with each item from the iterable.'''
 
-    def __init__(self, template, iterable, *, checkrc=True, stdout=None, run=True):
+    def __init__(self, template, iterable, *, checkrc=True, run=True):
         self.template = template
         self.iterable = list(iterable)
         self.dummy_indices = [i for i, v in enumerate(template) if isinstance(v, Dummy)]
-        self.stdout = stdout
         self.checkrc = checkrc
 
         self._sanity_check()
@@ -109,7 +99,7 @@ class subprocesses:
         else:
             raise TypeError('Objects in iterable must be all strings or all tuples')
 
-        dummy_count = sum(1 for t in self.template if isinstance(t, Dummy))
+        dummy_count = len(self.dummy_indices)
         length = len(self.iterable[0])
         for item in self.iterable:
             assert len(item) == length, 'Items in iterable not uniform in length'
@@ -130,7 +120,7 @@ class subprocesses:
         for command in commands:
             pretty_command = pprint.pformat(command, indent=4)
             log.debug('Running command:\n{}'.format(pretty_command))
-            handlers.append((subprocess.Popen(command, stdout=self.stdout), command))
+            handlers.append((subprocess.Popen(command), command))
 
         if self.checkrc:
             for h in handlers:

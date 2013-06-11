@@ -1,4 +1,4 @@
-from dpipe import subprocesses, Dummy
+from .dpipe import subprocesses, Dummy
 import unittest
 
 ####### subprocesses tests
