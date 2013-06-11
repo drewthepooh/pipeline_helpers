@@ -41,6 +41,25 @@ Wrapper of the check_call function from the subprocess module. Logs each command
 
     dpipe.callAndLog['ls', 'l']
 
+## working_dir
+
+Context manager for changing the working directory, e.g.
+
+    from dpipe import working_dir
+
+    with working_dir('/path/to/directory'):
+        # changes working directory
+    # changes to original working directory
+
+## ignored
+
+Context manager to ignore specifed exceptions
+
+Author: Raymond Hettinger (coming in Python 3.4). I added this so it can be used with older versions.
+
+     with ignored(FileExistsError):
+         os.mkdir('some_dir')
+
 ## processes
 
 Trivial (so trivial it's nearly useless) wrapper of the concurrent futures ProcessPoolExecutor map functionality. This function takes a function and an iterable and calls the function with each argument of the iterable in parallel.  Additional functionality (such as logging) will be added in the future.

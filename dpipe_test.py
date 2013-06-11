@@ -41,7 +41,7 @@ class CommandsCheck(unittest.TestCase):
     dummy = Dummy()
 
     def test_good_string(self):
-        '''should pass with known inputs'''
+        '''should pass with known string inputs'''
         knowninputs = (['echo', self.dummy], ['hello', 'world!', 'goodbye', 'now'])
         knownoutput = [
                             ['echo', 'hello'],
@@ -53,7 +53,7 @@ class CommandsCheck(unittest.TestCase):
         self.assertEqual(knownoutput, output)
 
     def test_good_tuple(self):
-        '''should pass with known inputs'''
+        '''should pass with known tuple inputs'''
         knowninputs = (['hey', self.dummy, 'name', self.dummy, self.dummy],
                        [('my', 'is', 'drew'),
                         ('joels', 'aint', 'drew'),

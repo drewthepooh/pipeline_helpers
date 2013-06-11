@@ -1,5 +1,5 @@
 *.pyc
 __pycache__
-test.py
 dpipe.log
+examples.py
 

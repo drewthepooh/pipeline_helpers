@@ -2,9 +2,11 @@ import logging
 import functools
 import pprint
 import subprocess
+import os
 from os.path import join as pjoin
 from concurrent import futures
 import sys
+from contextlib import contextmanager
 
 
 def initLogger(path):
@@ -55,6 +57,26 @@ def processes(func, iterable):
     with futures.ProcessPoolExecutor() as executor:
         result = executor.map(func, iterable)
     return result
+
+
+@contextmanager
+def working_dir(new_dir):
+    old_dir = os.getcwd()
+    os.chdir(new_dir)
+    try:
+        yield
+    finally:
+        os.chdir(old_dir)
+
+
+@contextmanager
+def ignored(*exceptions):
+    '''Context manager to ignore specifed exceptions
+    Author: Raymond Hettinger'''
+    try:
+        yield
+    except exceptions:
+        pass
 
 
 class Dummy:
