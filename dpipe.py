@@ -80,30 +80,32 @@ class subprocesses:
     by substituting dummies in the template with each item from the iterable.'''
 
     def __init__(self, template, iterable, *, checkrc=True, run=True):
-        self.template = template
-        self.iterable = list(iterable)
-        self.dummy_indices = [i for i, v in enumerate(template) if isinstance(v, Dummy)]
-        self.checkrc = checkrc
 
-        self._sanity_check()
-
-        if run:
-            self._execute_children()
-
-    def _sanity_check(self):
-        assert isinstance(self.template, list), 'Template must be a list'
-        if all(isinstance(x, str) for x in self.iterable):
-            self.iterable = [(x,) for x in self.iterable]
-        elif all(isinstance(x, tuple) for x in self.iterable):
-            pass
+        if isinstance(template, list):
+            self.template = template
         else:
-            raise TypeError('Objects in iterable must be all strings or all tuples')
+            raise TypeError('Expected a list for template')
+
+        self.dummy_indices = [i for i, v in enumerate(template) if isinstance(v, Dummy)]
+
+        iterable = list(iterable)
+        if all(isinstance(x, str) for x in iterable):
+            self.iterable = [(x,) for x in iterable]
+        elif all(isinstance(x, tuple) for x in iterable):
+            self.iterable = iterable
+        else:
+            raise TypeError('Expected all strings or all tuples in iterable')
 
         dummy_count = len(self.dummy_indices)
         length = len(self.iterable[0])
         for item in self.iterable:
             assert len(item) == length, 'Items in iterable not uniform in length'
         assert length == dummy_count, 'Number of dummies does not match iterable item length'
+
+        self.checkrc = checkrc
+
+        if run:
+            self._execute_children()
 
     def _get_commands(self):
         commands = []

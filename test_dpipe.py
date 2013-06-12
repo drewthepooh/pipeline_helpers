@@ -13,7 +13,7 @@ class SanityCheck(unittest.TestCase):
         '''sanity check should fail with non-list template'''
         template = ('echo', self.dummy)
         iterable = ['hello', 'world!']
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(TypeError):
             s = subprocesses(template, iterable, run=False)
 
     def test_fail_iterable_types(self):
