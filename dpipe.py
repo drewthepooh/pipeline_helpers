@@ -4,6 +4,7 @@ import functools
 import pprint
 import subprocess
 import os
+import os.path
 from os.path import join as pjoin
 from concurrent import futures
 import sys
@@ -11,30 +12,27 @@ from contextlib import contextmanager
 import json
 import shutil
 
-configDict = \
-    {'disable_existing_loggers': 'True',
-     'formatters': {'dpipeFormatter': {'datefmt': '%m/%d/%Y %H:%M:%S',
-                                       'format': '%(levelname)s [%(asctime)s] %(message)s'}},
-     'handlers': {'console': {'class': 'logging.StreamHandler',
-                              'formatter': 'dpipeFormatter',
-                              'level': 'INFO'},
-                  'file': {'class': 'logging.FileHandler',
-                           'filename': 'dpipe.log',
-                           'formatter': 'dpipeFormatter',
-                           'level': 'DEBUG'}},
-     'loggers': {'dpipe': {'handlers': ['console', 'file'], 'level': 'DEBUG'}},
-     'version': 1}
-
-logging.config.dictConfig(configDict)
-log = logging.getLogger('dpipe')
-
 
 def setLogPath(path):
-    # Move the log to the new directory
-    shutil.move('dpipe.log', path)
-    # Re-initialize logger
-    configDict['handlers']['file']['filename'] = pjoin(path, 'dpipe.log')
+
+    filename = pjoin(path, 'dpipe.log')
+    configDict = \
+        {'disable_existing_loggers': 'True',
+         'formatters': {'dpipeFormatter': {'datefmt': '%m/%d/%Y %H:%M:%S',
+                                           'format': '%(levelname)s [%(asctime)s] %(message)s'}},
+         'handlers': {'console': {'class': 'logging.StreamHandler',
+                                  'formatter': 'dpipeFormatter',
+                                  'level': 'INFO'},
+                      'file': {'class': 'logging.FileHandler',
+                               'filename': filename,
+                               'formatter': 'dpipeFormatter',
+                               'level': 'DEBUG'}},
+         'loggers': {'dpipe': {'handlers': ['console', 'file'], 'level': 'DEBUG'}},
+         'version': 1}
+
     logging.config.dictConfig(configDict)
+    global log
+    log = logging.getLogger('dpipe')
 
 
 def logwrap(func):

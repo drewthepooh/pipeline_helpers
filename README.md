@@ -8,9 +8,9 @@ Usage:
 
     import dpipe
 
-By default the dpipe logger (named "dpipe") will output the log file to the current directory. If you would like to change this, call the setLogPath function:
+_REQUIRED_: you must call the setLogPath function with the desired path to your log file before using any other functions in dpipe.py
 
-    dpipe.setLogPath('/path/to/log')
+    dpipe.setLogPath('/path/to/log/directory/')
 
 If you want to use the dpipe logger in your own code, import the logging module and get the logger:
 
