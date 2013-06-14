@@ -12,8 +12,6 @@ By default the dpipe logger (named "dpipe") will output the log file to the curr
 
     dpipe.setLogPath('/path/to/log')
 
-Note: you must keep the logconfig file in the same directory as dpipe.py. If you would like to customize logging behavior, edit the file.
-
 If you want to use the dpipe logger in your own code, import the logging module and get the logger:
 
     import logging

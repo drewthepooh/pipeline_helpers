@@ -2,4 +2,5 @@
 __pycache__
 dpipe.log
 examples.py
+logconfig.json
 

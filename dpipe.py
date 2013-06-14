@@ -11,9 +11,19 @@ from contextlib import contextmanager
 import json
 import shutil
 
-
-with open(pjoin(os.path.dirname(__file__), 'logconfig.json')) as f:
-    configDict = json.load(f)
+configDict = \
+    {'disable_existing_loggers': 'True',
+     'formatters': {'dpipeFormatter': {'datefmt': '%m/%d/%Y %H:%M:%S',
+                                       'format': '%(levelname)s [%(asctime)s] %(message)s'}},
+     'handlers': {'console': {'class': 'logging.StreamHandler',
+                              'formatter': 'dpipeFormatter',
+                              'level': 'INFO'},
+                  'file': {'class': 'logging.FileHandler',
+                           'filename': 'dpipe.log',
+                           'formatter': 'dpipeFormatter',
+                           'level': 'DEBUG'}},
+     'loggers': {'dpipe': {'handlers': ['console', 'file'], 'level': 'DEBUG'}},
+     'version': 1}
 
 logging.config.dictConfig(configDict)
 log = logging.getLogger('dpipe')
@@ -22,7 +32,7 @@ log = logging.getLogger('dpipe')
 def setLogPath(path):
     # Move the log to the new directory
     shutil.move('dpipe.log', path)
-    # Re-initialize logger if called
+    # Re-initialize logger
     configDict['handlers']['file']['filename'] = pjoin(path, 'dpipe.log')
     logging.config.dictConfig(configDict)
 
