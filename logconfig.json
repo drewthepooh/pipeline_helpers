@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "loggers": {
+    "dpipe": {
+      "level": "DEBUG",
+      "handlers": [
+        "console",
+        "file"
+      ]
+    }
+  },
+  "formatters": {
+    "dpipeFormatter": {
+      "datefmt": "%m/%d/%Y %H:%M:%S",
+      "format": "%(levelname)s [%(asctime)s] %(message)s"
+    }
+  },
+  "handlers": {
+    "file": {
+      "formatter": "dpipeFormatter",
+      "filename": "dpipe.log",
+      "level": "DEBUG",
+      "class": "logging.FileHandler"
+    },
+    "console": {
+      "formatter": "dpipeFormatter",
+      "level": "INFO",
+      "class": "logging.StreamHandler"
+    }
+  }
+}

@@ -7,11 +7,8 @@ Usage:
 ## Initialization
 
     import dpipe
-    dpipe.initLogger('/desired/path/to/logfile')
 
-Import the module and initialize the log, which will go to both the console and a file called dpipe.log.
-
-**IMPORTANT**: you must call initLogger before using any other dpipe function, as they depend on it.
+Simply import the module. By default the dpipe logger (named "dpipe") will output the log file to the current directory. If you would like to change this, modify the "filename" entry under "handlers" in the logconfig.json file.
 
 If you want to use the dpipe logger in your own code (which I recommend), simply import the logging module and get the logger instance:
 
@@ -51,6 +48,13 @@ Context manager for changing the working directory, e.g.
     with working_dir('/path/to/directory'):
         # changes working directory
     # changes to original working directory
+
+You can also use this as a decorator to change the working directory for the duration of a function call:
+
+    @working_dir('/path/to/directory')
+    def my_func():
+        # runs in specified working directory
+    # runs in original working directory
 
 ## ignored
 

@@ -1,4 +1,5 @@
 import logging
+import logging.config
 import functools
 import pprint
 import subprocess
@@ -7,24 +8,14 @@ from os.path import join as pjoin
 from concurrent import futures
 import sys
 from contextlib import contextmanager
+import json
+from pprint import pprint
 
+with open('logconfig.json') as f:
+    config_d = json.load(f)
 
-def initLogger(path):
-    format = '%(levelname)s [%(asctime)s] %(message)s'
-    datefmt = '%m/%d/%Y %H:%M:%S'
-
-    global log
-    log = logging.getLogger(__name__)
-    log.setLevel(logging.DEBUG)
-    ch = logging.StreamHandler()
-    ch.setLevel(logging.INFO)
-    formatter = logging.Formatter(fmt=format, datefmt=datefmt)
-    ch.setFormatter(formatter)
-    log.addHandler(ch)
-    fh = logging.FileHandler(pjoin(path, 'dpipe.log'))
-    fh.setLevel(logging.DEBUG)
-    fh.setFormatter(formatter)
-    log.addHandler(fh)
+logging.config.dictConfig(config_d)
+log = logging.getLogger('dpipe')
 
 
 def logwrap(func):
