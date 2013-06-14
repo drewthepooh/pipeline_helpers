@@ -9,13 +9,22 @@ from concurrent import futures
 import sys
 from contextlib import contextmanager
 import json
-from pprint import pprint
+import shutil
 
-with open('logconfig.json') as f:
-    config_d = json.load(f)
 
-logging.config.dictConfig(config_d)
+with open(pjoin(os.path.dirname(__file__), 'logconfig.json')) as f:
+    configDict = json.load(f)
+
+logging.config.dictConfig(configDict)
 log = logging.getLogger('dpipe')
+
+
+def setLogPath(path):
+    # Move the log to the new directory
+    shutil.move('dpipe.log', path)
+    # Re-initialize logger if called
+    configDict['handlers']['file']['filename'] = pjoin(path, 'dpipe.log')
+    logging.config.dictConfig(configDict)
 
 
 def logwrap(func):

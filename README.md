@@ -8,11 +8,16 @@ Usage:
 
     import dpipe
 
-Simply import the module. By default the dpipe logger (named "dpipe") will output the log file to the current directory. If you would like to change this, modify the "filename" entry under "handlers" in the logconfig.json file.
+By default the dpipe logger (named "dpipe") will output the log file to the current directory. If you would like to change this, call the setLogPath function:
 
-If you want to use the dpipe logger in your own code (which I recommend), simply import the logging module and get the logger instance:
+    dpipe.setLogPath('/path/to/log')
+
+Note: you must keep the logconfig file in the same directory as dpipe.py. If you would like to customize logging behavior, edit the file.
+
+If you want to use the dpipe logger in your own code, import the logging module and get the logger:
 
     import logging
+
     log = logging.getLogger('dpipe')
     log.info('Some info message in your code')  # Will go to console and file
     log.debug('Some debug message in your code')  # Will go to dpipe.log but not console.
