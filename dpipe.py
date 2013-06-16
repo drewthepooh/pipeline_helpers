@@ -4,13 +4,10 @@ import functools
 import pprint
 import subprocess
 import os
-import os.path
 from os.path import join as pjoin
-from concurrent import futures
-import sys
 from contextlib import contextmanager
-import json
-import shutil
+from concurrent.futures import ThreadPoolExecutor
+import time
 
 
 def setLogPath(path):
@@ -35,7 +32,7 @@ def setLogPath(path):
     log = logging.getLogger('dpipe')
 
 
-def logwrap(func):
+def logged(func):
     '''Decorator which will wrap functions so that the beginning
     and end is logged.'''
 
@@ -80,6 +77,36 @@ def ignored(*exceptions):
 
 class Dummy:
     pass
+
+
+def ossilatingCounter(amount):
+    while True:
+        for x in range(amount + 1):
+            yield x
+        for x in reversed(range(1, amount)):
+            yield x
+
+def progressbar(func):
+    '''decorator that allows you to add a progress bar to a function'''
+    columns = os.get_terminal_size().columns
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        with ThreadPoolExecutor(1) as executor:
+            future = executor.submit(func, *args, **kwargs)
+            start = time.perf_counter()
+            running = True
+            counter = ossilatingCounter(40)
+            while running:
+                count = next(counter)
+                elapsed = time.perf_counter() - start
+                bar = ('[' + ' '*count + '*' + ' '*(40 - count) + ']' +
+                       ' elapsed: ' + format(elapsed, '.2f'))
+                print(format(bar, '^{}'.format(columns)), end='\r')
+                time.sleep(1)
+                running = future.running()
+            print()
+            return future.result()
+    return wrapper
 
 
 class subprocesses:

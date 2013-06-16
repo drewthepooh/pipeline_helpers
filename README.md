@@ -20,11 +20,13 @@ If you want to use the dpipe logger in your own code, import the logging module 
     log.info('Some info message in your code')  # Will go to console and file
     log.debug('Some debug message in your code')  # Will go to dpipe.log but not console.
 
-## logwrap
+## logged
 
 A decorator that you can use to log function starts and ends, e.g.:
 
-    @dpipe.logwrap
+    from dpipe import logged
+
+    @logged
     def my_pipeline_function():
         print('Running...')
 
@@ -68,6 +70,26 @@ Author: Raymond Hettinger (coming in Python 3.4). I added this so it can be used
      with ignored(FileExistsError):
          os.mkdir('some_dir')
 
+## progressbar
+
+Adds a progress bar to function calls:
+
+    from dpipe import progressbar
+
+    @progressbar
+    def my_func():
+        ...
+
+You see:
+
+    [              *                          ] elapsed: 14.01
+
+_Note:_ if you want to use this in conjunction with logged I recommend this order:
+
+    @logged
+    @progressbar
+    def my_func()
+        ...
 
 ## subprocesses
 
